@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "422670946485",
+    "project_id": "student-infor-management-app",
+    "storage_bucket": "student-infor-management-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422670946485:android:e7bc69a2500ca206ed6efc",
+        "android_client_info": {
+          "package_name": "com.ngtnl1.student_information_management_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDg6LaXrusPd0vxF8tXSHdmCmBhKyWYn2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
