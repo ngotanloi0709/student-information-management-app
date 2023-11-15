@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 public class BaseRepository<T> {
 
-    private final String collectionName;
+    protected final String collectionName;
     protected FirebaseFirestore db;
 
     public BaseRepository(String collectionName) {
@@ -20,10 +20,6 @@ public class BaseRepository<T> {
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-    }
-
-    public Task<DocumentReference> create(T item) {
-        return db.collection(collectionName).add(item);
     }
 
     public Task<Void> update(String id, T item) {

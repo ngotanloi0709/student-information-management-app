@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -34,11 +35,20 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation("com.google.firebase:firebase-auth:22.2.0")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
-    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    // lombok
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
+
+    // hilt
+    implementation("com.google.dagger:hilt-android:2.48.1")
+    annotationProcessor("com.google.dagger:hilt-android-compiler:2.48.1")
+
+    // glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
