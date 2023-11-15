@@ -10,6 +10,16 @@ import lombok.NoArgsConstructor;
 public class User {
     private String id;
     private String email;
-    private String fullname;
+    private String name;
+    private String age;
     private String phone;
+    private boolean isLocked;
+    private String role;
+
+    public User(String id, String email, String name) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.role = "USER";
+    }
 }

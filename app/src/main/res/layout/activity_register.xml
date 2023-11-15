@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".controller.RegisterActivity">
+
+    <EditText
+        android:id="@+id/editTextRegisterUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter Username"
+        android:inputType="text"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/editTextRegisterEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter Email"
+        android:inputType="text|textEmailAddress"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/editTextRegisterPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter Password"
+        android:inputType="text|textPassword"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/editTextRegisterRepeatPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Repeat Password"
+        android:inputType="text|textPassword"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/buttonRegisterRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="REGISTER"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/buttonRegisterChangeToLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="OR LOGIN"
+        android:textSize="16sp" />
+</LinearLayout>

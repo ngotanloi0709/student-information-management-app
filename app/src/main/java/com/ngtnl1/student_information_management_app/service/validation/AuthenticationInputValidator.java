@@ -1,0 +1,32 @@
+package com.ngtnl1.student_information_management_app.service.validation;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+public class AuthenticationInputValidator {
+    @Inject
+    public AuthenticationInputValidator() {
+    }
+    public boolean isEmailValid(String email) {
+        return email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+    }
+
+    public boolean isPasswordValid(String password) {
+        return password.length() >= 6;
+    }
+
+    public boolean isUsernameValid(String username) {
+        String usernameRegex = "^[a-zA-ZÁÀẢẠÃĂẮẰẲẶẴÂẤẦẨẬẪáàảạãăắằẳặẵâấầẩậẫÉÈẺẸẼÊẾỀỂỆỄéèẻẹẽêếềểệễÍÌỈỊĨíìỉịĩÓÒỎỌÕƠỚỜỞỢỠÔỐỒỔỘỖóòỏọõơớờởợỡôốồổộỗÚÙỦỤŨƯỨỪỬỰỮúùủụũưứừửựữ]+( [a-zA-ZÁÀẢẠÃĂẮẰẲẶẴÂẤẦẨẬẪáàảạãăắằẳặẵâấầẩậẫÉÈẺẸẼÊẾỀỂỆỄéèẻẹẽêếềểệễÍÌỈỊĨíìỉịĩÓÒỎỌÕƠỚỜỞỢỠÔỐỒỔỘỖóòỏọõơớờởợỡôốồổộỗÚÙỦỤŨƯỨỪỬỰỮúùủụũưứừửựữ]+)*$";
+        return username.matches(usernameRegex);
+    }
+
+
+    public boolean isPhoneValid(String phone) {
+        return phone.matches("^(?:\\d{9}|\\d{10})$");
+    }
+
+    public boolean isRepeatPasswordValid(String password, String repeatPassword) {
+        return password.equals(repeatPassword);
+    }
+}
