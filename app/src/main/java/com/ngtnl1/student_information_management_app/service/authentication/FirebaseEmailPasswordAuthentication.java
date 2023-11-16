@@ -36,20 +36,24 @@ public class FirebaseEmailPasswordAuthentication {
             getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
                 User user = documentSnapshot.toObject(User.class);
 
-                List<String> loginHistory = user.getLoginHistory();
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-                if (loginHistory != null) {
-                    loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
-                    user.setLoginHistory(loginHistory);
-                } else {
-                    loginHistory = new ArrayList<>();
-                    loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
-                    user.setLoginHistory(loginHistory);
-                }
+                addLoginHistory(user);
 
                 userRepository.update(user.getId(), user);
             });
         });
+    }
+
+    private void addLoginHistory(User user) {
+        List<String> loginHistory = user.getLoginHistory();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        if (loginHistory != null) {
+            loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+            user.setLoginHistory(loginHistory);
+        } else {
+            loginHistory = new ArrayList<>();
+            loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+            user.setLoginHistory(loginHistory);
+        }
     }
 
     public Task<AuthResult> register(String email, String password, String username) {
@@ -57,6 +61,8 @@ public class FirebaseEmailPasswordAuthentication {
                 .continueWithTask(task -> {
                     if (task.isSuccessful()) {
                         User user = new User(firebaseAuth.getUid(), email, username);
+
+                        addLoginHistory(user);
 
                         return userRepository.create(user)
                                 .continueWithTask(createTask -> {

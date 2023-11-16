@@ -7,6 +7,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +26,7 @@ import com.ngtnl1.student_information_management_app.R;
 import com.ngtnl1.student_information_management_app.controller.adapter.UserManagementAdapter;
 import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.service.UserService;
+import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +40,7 @@ public class UserManagementFragment extends Fragment {
     private List<User> items;
     private UserManagementAdapter adapter;
     private RecyclerView recyclerView;
+    private User selectedUser;
     @Inject
     UserService userService;
     @Inject
@@ -70,7 +76,6 @@ public class UserManagementFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         registerForContextMenu(recyclerView);
 
-//        adapter.setOnUserItemClickListener((position, user) -> showContextMenu(user));
         adapter.setOnUserItemClickListener(new UserManagementAdapter.OnUserItemClickListener() {
             @Override
             public void onItemClick(int position, User user) {
@@ -79,14 +84,15 @@ public class UserManagementFragment extends Fragment {
 
             @Override
             public void onItemLongClick(int position, User user) {
-                showContextMenu(user);
+                selectedUser = user;
+                showContextMenu();
             }
         });
 
         updateData();
     }
 
-    private void showContextMenu(User user) {
+    private void showContextMenu() {
         registerForContextMenu(recyclerView);
         getActivity().openContextMenu(recyclerView);
         unregisterForContextMenu(recyclerView);
@@ -104,7 +110,7 @@ public class UserManagementFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.menuMainItemUserEdit) {
-            // Xử lý sự kiện edit
+            showEditUserDetailsDialog();
             return true;
         } else if (id == R.id.menuMainItemUserDelete) {
             // Xử lý sự kiện delete
@@ -120,10 +126,10 @@ public class UserManagementFragment extends Fragment {
 
         View view = getLayoutInflater().inflate(R.layout.dialog_user_detail, null);
 
-        TextView textViewDialogUserDetailName = view.findViewById(R.id.textViewDialogUserDetailName);
-        TextView textViewDialogUserDetailAge = view.findViewById(R.id.textViewDialogUserDetailAge);
+        TextView textViewDialogUserDetailName = view.findViewById(R.id.editTextDialogUserDetailName);
+        TextView textViewDialogUserDetailAge = view.findViewById(R.id.editTextDialogUserDetailAge);
         TextView textViewDialogUserDetailEmail = view.findViewById(R.id.textViewDialogUserDetailEmail);
-        TextView textViewDialogUserDetailPhone = view.findViewById(R.id.textViewDialogUserDetailPhone);
+        TextView textViewDialogUserDetailPhone = view.findViewById(R.id.editTextDialogUserDetailPhone);
         TextView textViewDialogUserDetailIsLocked = view.findViewById(R.id.textViewDialogUserDetailIsLocked);
         TextView textViewDialogUserDetailRole = view.findViewById(R.id.textViewDialogUserDetailRole);
         TextView textViewDialogUserDetailLoginHistory = view.findViewById(R.id.textViewDialogUserDetailLoginHistory);
@@ -135,8 +141,11 @@ public class UserManagementFragment extends Fragment {
         textViewDialogUserDetailIsLocked.setText(user.isLocked() ? "Đã khóa" : "Chưa khóa");
         textViewDialogUserDetailRole.setText(user.getRole());
         textViewDialogUserDetailLoginHistory.append("\n");
-        for (String loginHistory : user.getLoginHistory()) {
-            textViewDialogUserDetailLoginHistory.append(loginHistory + "\n");
+
+        if (user.getLoginHistory() != null) {
+            for (String loginHistory : user.getLoginHistory()) {
+                textViewDialogUserDetailLoginHistory.append(loginHistory + "\n");
+            }
         }
 
         builder.setView(view);
@@ -146,10 +155,59 @@ public class UserManagementFragment extends Fragment {
         builder.show();
     }
 
+    private void showEditUserDetailsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Thay đổi thông tin người dùng");
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_edit_user_detail, null);
+
+        EditText editTextDialogEditUserDetailName = view.findViewById(R.id.editTextDialogEditUserDetailName);
+        EditText editTextDialogEditUserDetailAge = view.findViewById(R.id.editTextDialogEditUserDetailAge);
+        EditText editTextDialogEditUserDetailPhone = view.findViewById(R.id.editTextDialogEditUserDetailPhone);
+        CheckBox checkBoxDialogEditUserDetailIsLocked = view.findViewById(R.id.checkBoxDialogEditUserDetailIsLocked);
+        Spinner spinnerDialogEditUserDetailRole = view.findViewById(R.id.spinnerDialogEditUserDetailRole);
+
+        List<String> data = new ArrayList<>();
+        data.add("GUEST");
+        data.add("USER");
+        data.add("ADMIN");
+
+        editTextDialogEditUserDetailName.setText(selectedUser.getName());
+        editTextDialogEditUserDetailAge.setText(selectedUser.getAge());
+        editTextDialogEditUserDetailPhone.setText(selectedUser.getPhone());
+        checkBoxDialogEditUserDetailIsLocked.setChecked(selectedUser.isLocked());
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, data);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDialogEditUserDetailRole.setAdapter(spinnerAdapter);
+        int defaultPosition = spinnerAdapter.getPosition(selectedUser.getRole());
+        spinnerDialogEditUserDetailRole.setSelection(defaultPosition);
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Lưu", (dialog, which) -> {
+            selectedUser.setName(editTextDialogEditUserDetailName.getText().toString());
+            selectedUser.setAge(editTextDialogEditUserDetailAge.getText().toString());
+            selectedUser.setPhone(editTextDialogEditUserDetailPhone.getText().toString());
+            selectedUser.setLocked(checkBoxDialogEditUserDetailIsLocked.isChecked());
+            selectedUser.setRole(spinnerDialogEditUserDetailRole.getSelectedItem().toString());
+
+            saveUserDetails();
+            dialog.dismiss();
+        });
+
+        builder.show();
+    }
+
+    private void saveUserDetails() {
+        userService.setUserData(selectedUser);
+        updateData();
+    }
 
     private void updateData() {
         userService.getAllUser().addOnCompleteListener(queryDocumentSnapshots -> {
             if (queryDocumentSnapshots.isSuccessful()) {
+                items.clear();
                 for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
                     User user = documentSnapshot.toObject(User.class);
 

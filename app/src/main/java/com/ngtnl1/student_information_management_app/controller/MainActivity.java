@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -25,6 +26,7 @@ import com.ngtnl1.student_information_management_app.controller.fragment.Student
 import com.ngtnl1.student_information_management_app.controller.fragment.ProfileManagementFragment;
 import com.ngtnl1.student_information_management_app.controller.fragment.UserManagementFragment;
 import com.ngtnl1.student_information_management_app.model.User;
+import com.ngtnl1.student_information_management_app.service.appstatus.InternetStatus;
 import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
 import javax.inject.Inject;
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
     @Inject
     StorageReference storageReference;
+    @Inject
+    InternetStatus internetStatus;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -92,9 +96,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (itemId == R.id.menuItemMainHomepage) {
             selectedFragment = new StudentManagementFragment();
         } else if (itemId == R.id.menuItemMainUserManagement) {
-            selectedFragment = new UserManagementFragment();
+            if (internetStatus.isOnline()) {
+                selectedFragment = new UserManagementFragment();
+            } else {
+                Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
+            }
         } else if (itemId == R.id.menuItemMainProfileManagement) {
-            selectedFragment = new ProfileManagementFragment();
+            if (internetStatus.isOnline()) {
+                selectedFragment = new ProfileManagementFragment();
+            } else {
+                Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
+            }
         } else if (itemId == R.id.menuItemMainLogin) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         } else if (itemId == R.id.menuItemMainLogout) {
@@ -114,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @SuppressLint("SetTextI18n")
-    private void setAuthStatusViews(boolean isLogged) {
+    public void setAuthStatusViews(boolean isLogged) {
         if (isLogged) {
             menuItemMainLogin.setVisible(false);
             menuItemMainLogout.setVisible(true);
@@ -138,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setProfileImage() {
-        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
+        if (firebaseEmailPasswordAuthentication.isUserSignedIn() && internetStatus.isOnline()) {
             storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
                 Glide.with(this).load(uri).into(imageMainAvatar);
             }).addOnFailureListener(exception -> {
