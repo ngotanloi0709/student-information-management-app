@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
@@ -43,13 +44,13 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class UserProfileFragment extends Fragment {
+public class ProfileManagementFragment extends Fragment {
     @Inject
     FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
     @Inject
     UserService userService;
     @Inject
-    StorageReference storagePreference;
+    StorageReference storageReference;
     public static final int REQUEST_CODE_CAMERA = 1;
     private ShapeableImageView imageMainProfileManagementAvatar;
     private ImageButton buttonMainProfileManagementCamera;
@@ -58,7 +59,7 @@ public class UserProfileFragment extends Fragment {
     private EditText editTextMainProfileManagementPhone;
     private Button buttonMainProfileManagementSave;
 
-    public UserProfileFragment() {
+    public ProfileManagementFragment() {
         // Required empty public constructor
     }
 
@@ -102,8 +103,27 @@ public class UserProfileFragment extends Fragment {
                 editTextMainProfileManagementName.setText(user.getName());
                 editTextMainProfileManagementAge.setText(user.getAge());
                 editTextMainProfileManagementPhone.setText(user.getPhone());
+
+            } else {
+                editTextMainProfileManagementName.setText("");
+                editTextMainProfileManagementAge.setText("");
+                editTextMainProfileManagementPhone.setText("");
             }
+
+            setProfileImage();
         });
+    }
+
+    private void setProfileImage() {
+        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
+            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+                Glide.with(this).load(uri).into(imageMainProfileManagementAvatar);
+            }).addOnFailureListener(exception -> {
+                Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
+            });
+        } else {
+            Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
+        }
     }
 
     private void setOnClickListeners() {
@@ -196,13 +216,13 @@ public class UserProfileFragment extends Fragment {
         System.out.println(fileUri);
 
         if (fileUri != null) {
-            storagePreference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").putFile(fileUri);
+            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").putFile(fileUri);
         }
     }
 
     private void onBackPress() {
         FragmentManager fragmentManager = getParentFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainerView, new HomepageFragment()).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragmentContainerView, new StudentManagementFragment()).commit();
     }
 }
 

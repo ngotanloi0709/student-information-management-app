@@ -108,7 +108,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
 
         if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
-            finish();
+            changeToMain();
         }
     }
 }

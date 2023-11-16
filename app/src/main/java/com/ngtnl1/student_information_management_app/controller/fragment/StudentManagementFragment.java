@@ -12,14 +12,14 @@ import com.ngtnl1.student_information_management_app.R;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HomepageFragment extends Fragment {
-    public HomepageFragment() {
+public class StudentManagementFragment extends Fragment {
+    public StudentManagementFragment() {
         // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main_homepage, container, false);
+        View view = inflater.inflate(R.layout.fragment_main_student_management, container, false);
 
         return view;
     }

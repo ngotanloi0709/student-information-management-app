@@ -21,9 +21,9 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
-import com.ngtnl1.student_information_management_app.controller.fragment.HomepageFragment;
+import com.ngtnl1.student_information_management_app.controller.fragment.StudentManagementFragment;
+import com.ngtnl1.student_information_management_app.controller.fragment.ProfileManagementFragment;
 import com.ngtnl1.student_information_management_app.controller.fragment.UserManagementFragment;
-import com.ngtnl1.student_information_management_app.controller.fragment.UserProfileFragment;
 import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
@@ -58,11 +58,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
 
         navigationView.setNavigationItemSelectedListener(this);
-        imageMainAvatar = navigationView.getHeaderView(0).findViewById(R.id.imageMainAvatar);
+        imageMainAvatar = navigationView.getHeaderView(0).findViewById(R.id.imageMainUserManagementAvatar);
         textViewMainUsername = navigationView.getHeaderView(0).findViewById(R.id.textViewMainUsername);
         textViewMainEmail = navigationView.getHeaderView(0).findViewById(R.id.textViewMainEmail);
         menuItemMainLogin = navigationView.getMenu().findItem(R.id.menuItemMainLogin);
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setDefaultFragment() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomepageFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new StudentManagementFragment()).commit();
         navigationView.setCheckedItem(R.id.menuItemMainHomepage);
     }
 
@@ -89,16 +90,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int itemId = item.getItemId();
 
         if (itemId == R.id.menuItemMainHomepage) {
-            selectedFragment = new HomepageFragment();
+            selectedFragment = new StudentManagementFragment();
         } else if (itemId == R.id.menuItemMainUserManagement) {
             selectedFragment = new UserManagementFragment();
         } else if (itemId == R.id.menuItemMainProfileManagement) {
-            selectedFragment = new UserProfileFragment();
+            selectedFragment = new ProfileManagementFragment();
         } else if (itemId == R.id.menuItemMainLogin) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         } else if (itemId == R.id.menuItemMainLogout) {
             FirebaseAuth.getInstance().signOut();
             setAuthStatusViews(false);
+            changeToLogin();
         }
 
         if (selectedFragment != null) {
@@ -125,24 +127,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     textViewMainEmail.setText(user.getEmail());
                 }
             });
-
-            setProfileImage();
         } else {
             menuItemMainLogin.setVisible(true);
             menuItemMainLogout.setVisible(false);
             textViewMainUsername.setText("   Guest");
             textViewMainEmail.setText("");
+        }
+
+        setProfileImage();
+    }
+
+    private void setProfileImage() {
+        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
+            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+                Glide.with(this).load(uri).into(imageMainAvatar);
+            }).addOnFailureListener(exception -> {
+                Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
+            });
+        } else {
             Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
         }
     }
 
-    private void setProfileImage() {
-        storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-            Glide.with(this).load(uri).into(imageMainAvatar);
-        }).addOnFailureListener(exception -> {
-            Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
-        });
-
+    private void changeToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -178,7 +188,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
 
         setAuthStatusViews(firebaseEmailPasswordAuthentication.isUserSignedIn());
-
-
     }
 }
