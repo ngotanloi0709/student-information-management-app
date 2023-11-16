@@ -8,6 +8,11 @@ import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.repository.UserRepository;
 import com.ngtnl1.student_information_management_app.service.appstatus.InternetStatus;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -27,7 +32,24 @@ public class FirebaseEmailPasswordAuthentication {
     }
 
     public Task<AuthResult> logIn(String email, String password) {
-        return firebaseAuth.signInWithEmailAndPassword(email, password);
+        return firebaseAuth.signInWithEmailAndPassword(email, password).addOnSuccessListener(authResult -> {
+            getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+                User user = documentSnapshot.toObject(User.class);
+
+                List<String> loginHistory = user.getLoginHistory();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+                if (loginHistory != null) {
+                    loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+                    user.setLoginHistory(loginHistory);
+                } else {
+                    loginHistory = new ArrayList<>();
+                    loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+                    user.setLoginHistory(loginHistory);
+                }
+
+                userRepository.update(user.getId(), user);
+            });
+        });
     }
 
     public Task<AuthResult> register(String email, String password, String username) {
@@ -50,28 +72,12 @@ public class FirebaseEmailPasswordAuthentication {
                 });
     }
 
-    public User getUserData() {
-        return userRepository.find(getUserUid()).getResult().toObject(User.class);
-    }
-
     public Task<DocumentSnapshot> getUserDataRaw() {
         return userRepository.find(getUserUid());
     }
 
     public String getUserUid() {
         return firebaseAuth.getCurrentUser().getUid();
-    }
-
-    public String getUsername() {
-        return getUserData().getName();
-    }
-
-    public String getUserEmail() {
-        return getUserData().getEmail();
-    }
-
-    public String getUserRole() {
-        return getUserData().getRole();
     }
 
     public boolean isUserSignedIn() {

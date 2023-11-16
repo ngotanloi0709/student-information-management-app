@@ -12,7 +12,7 @@
         android:layout_marginLeft="10dp">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imageMainAvatar"
+            android:id="@+id/imageMainUserManagementAvatar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
