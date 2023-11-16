@@ -35,24 +35,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
-        android:text="Name" />
+        android:hint="Tên người dùng"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/editTextMainProfileManagementAge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
-        android:text="Age" />
+        android:hint="Tuổi"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/editTextMainProfileManagementPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
-        android:text="Phone number" />
+        android:hint="Số điện thoại"
+        android:inputType="text" />
 
     <Button
         android:id="@+id/buttonMainProfileManagementSave"

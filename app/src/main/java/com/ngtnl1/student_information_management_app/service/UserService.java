@@ -27,6 +27,6 @@ public class UserService {
     }
 
     public void setUserData(User user) {
-        userRepository.update(firebaseEmailPasswordAuthentication.getUserUid(), user);
+        userRepository.update(user.getId(), user);
     }
 }

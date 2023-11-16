@@ -31,8 +31,10 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
+import com.ngtnl1.student_information_management_app.controller.MainActivity;
 import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.service.UserService;
+import com.ngtnl1.student_information_management_app.service.appstatus.InternetStatus;
 import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
 import java.io.File;
@@ -51,6 +53,8 @@ public class ProfileManagementFragment extends Fragment {
     UserService userService;
     @Inject
     StorageReference storageReference;
+    @Inject
+    InternetStatus internetStatus;
     public static final int REQUEST_CODE_CAMERA = 1;
     private ShapeableImageView imageMainProfileManagementAvatar;
     private ImageButton buttonMainProfileManagementCamera;
@@ -211,18 +215,30 @@ public class ProfileManagementFragment extends Fragment {
     }
 
     private void uploadImage() {
-        File file = new File(getCurrentPhotoPath());
-        Uri fileUri = Uri.fromFile(file);
-        System.out.println(fileUri);
+        if (internetStatus.isOnline()) {
+            File file = new File(getCurrentPhotoPath());
+            Uri fileUri = Uri.fromFile(file);
 
-        if (fileUri != null) {
-            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").putFile(fileUri);
+            if (fileUri != null) {
+                storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        MainActivity mainActivity = (MainActivity) requireActivity();
+                        mainActivity.setAuthStatusViews(firebaseEmailPasswordAuthentication.isUserSignedIn());
+                    } else {
+                        Toast.makeText(requireContext(), "Lỗi, không thể cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            file.delete();
+        } else {
+            Toast.makeText(requireContext(), "Không có kết nối internet", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void onBackPress() {
         FragmentManager fragmentManager = getParentFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainerView, new StudentManagementFragment()).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragmentContainerView, new StudentManagementFragment()).addToBackStack(null).commit();
     }
 }
 

@@ -16,8 +16,8 @@
             android:text="Tên người dùng: "
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/editTextDialogUserDetailName"
+        <EditText
+            android:id="@+id/editTextDialogEditUserDetailName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -36,8 +36,8 @@
             android:text="Tuổi: "
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/editTextDialogUserDetailAge"
+        <EditText
+            android:id="@+id/editTextDialogEditUserDetailAge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -53,31 +53,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Email: "
+            android:text="Số điện thoại: "
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/textViewDialogUserDetailEmail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Phone number: "
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/editTextDialogUserDetailPhone"
+        <EditText
+            android:id="@+id/editTextDialogEditUserDetailPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -96,13 +76,13 @@
             android:text="Bị khoá: "
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/textViewDialogUserDetailIsLocked"
+        <CheckBox
+            android:id="@+id/checkBoxDialogEditUserDetailIsLocked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text=""
-            android:textSize="18sp" />
+            android:text="Khoá" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -116,28 +96,11 @@
             android:text="Vai trò: "
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/textViewDialogUserDetailRole"
+        <Spinner
+            android:id="@+id/spinnerDialogEditUserDetailRole"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
-            android:textSize="18sp" />
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Lịch sử đăng nhập: "
-        android:textSize="18sp" />
-
-    <TextView
-        android:id="@+id/textViewDialogUserDetailLoginHistory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="10dp"
-        android:text=""
-        android:textSize="18sp" />
 
 </LinearLayout>
