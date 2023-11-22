@@ -1,37 +1,123 @@
 package com.ngtnl1.student_information_management_app.service;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.repository.UserRepository;
-import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class UserService {
+    FirebaseAuth firebaseAuth;
     UserRepository userRepository;
-    FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
+    AppStatusService appStatusService;
 
     @Inject
-    public UserService(UserRepository userRepository, FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication) {
+    public UserService(FirebaseAuth firebaseAuth, UserRepository userRepository, AppStatusService appStatusService) {
+        this.firebaseAuth = firebaseAuth;
         this.userRepository = userRepository;
-        this.firebaseEmailPasswordAuthentication = firebaseEmailPasswordAuthentication;
+        this.appStatusService = appStatusService;
     }
 
-    public Task<QuerySnapshot> getAllUser() {
+    public Task<AuthResult> logIn(String email, String password) {
+        return firebaseAuth.signInWithEmailAndPassword(email, password).addOnSuccessListener(authResult -> {
+            getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+                User user = documentSnapshot.toObject(User.class);
+
+                addLoginHistory(user);
+
+                userRepository.update(user.getEmail(), user);
+            });
+        });
+    }
+
+    private void addLoginHistory(User user) {
+        List<String> loginHistory = user.getLoginHistory();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        if (loginHistory != null) {
+            loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+            user.setLoginHistory(loginHistory);
+        } else {
+            loginHistory = new ArrayList<>();
+            loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
+            user.setLoginHistory(loginHistory);
+        }
+    }
+
+    public Task<AuthResult> register(String email, String password, String username) {
+        return firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .continueWithTask(task -> {
+                    if (task.isSuccessful()) {
+                        User user = new User(email, username);
+
+                        addLoginHistory(user);
+
+                        return userRepository.create(user)
+                                .continueWithTask(createTask -> {
+                                    if (createTask.isSuccessful()) {
+                                        return task;
+                                    } else {
+                                        throw Objects.requireNonNull(createTask.getException());
+                                    }
+                                });
+                    } else {
+                        throw Objects.requireNonNull(task.getException());
+                    }
+                });
+    }
+
+    public Task<DocumentSnapshot> getUserDataRaw() {
+        return userRepository.find(getUserEmail());
+    }
+
+    public String getUserEmail() {
+        return firebaseAuth.getCurrentUser().getEmail();
+    }
+
+    public Task<QuerySnapshot> findAllUser() {
         return userRepository.findAll();
     }
 
-    public Task<Void> setUserData(User user) {
+    public Task<Void> setUser(User user) {
         return userRepository.update(user.getEmail(), user);
     }
 
-    public Task<Void> createUserData(User user) {
+    public Task<Void> createUser(User user) {
         return userRepository.create(user);
+    }
+
+    public boolean isUserSignedIn() {
+        return firebaseAuth.getCurrentUser() != null;
+    }
+
+    public String getFirebaseErrorMessage(Exception exception) {
+        try {
+            if (!appStatusService.isOnline()) {
+                return "Không có kết nối internet.";
+            }
+
+            switch (Objects.requireNonNull(exception.getMessage())) {
+                case "An internal error has occurred. [ INVALID_LOGIN_CREDENTIALS ]":
+                    return "Sai tên email hoặc mật khẩu.";
+                case "The email address is already in use by another account.":
+                    return "Email đã được sử dụng để đăng ký.";
+                default:
+                    return "Có lỗi xảy ra. Vui lòng thử lại.";
+            }
+        } catch (Exception e) {
+            return "Có lỗi xảy ra. Vui lòng thử lại.";
+        }
     }
 }

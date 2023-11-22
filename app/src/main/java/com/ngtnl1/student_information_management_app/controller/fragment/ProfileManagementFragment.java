@@ -33,9 +33,8 @@ import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
 import com.ngtnl1.student_information_management_app.controller.MainActivity;
 import com.ngtnl1.student_information_management_app.model.User;
+import com.ngtnl1.student_information_management_app.service.AppStatusService;
 import com.ngtnl1.student_information_management_app.service.UserService;
-import com.ngtnl1.student_information_management_app.service.appstatus.InternetStatus;
-import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,13 +47,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class ProfileManagementFragment extends Fragment {
     @Inject
-    FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
-    @Inject
     UserService userService;
     @Inject
     StorageReference storageReference;
     @Inject
-    InternetStatus internetStatus;
+    AppStatusService appStatusService;
     public static final int REQUEST_CODE_CAMERA = 1;
     private ShapeableImageView imageMainProfileManagementAvatar;
     private ImageButton buttonMainProfileManagementCamera;
@@ -100,7 +97,7 @@ public class ProfileManagementFragment extends Fragment {
     }
 
     private void setDataFromDatabase() {
-        firebaseEmailPasswordAuthentication.getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+        userService.getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
             User user = documentSnapshot.toObject(User.class);
 
             if (user != null) {
@@ -119,8 +116,8 @@ public class ProfileManagementFragment extends Fragment {
     }
 
     private void setProfileImage() {
-        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
-            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+        if (userService.isUserSignedIn()) {
+            storageReference.child("images/" + userService.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
                 Glide.with(this).load(uri).into(imageMainProfileManagementAvatar);
             }).addOnFailureListener(exception -> {
                 Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
@@ -190,7 +187,7 @@ public class ProfileManagementFragment extends Fragment {
     }
 
     private void saveProfile() {
-        firebaseEmailPasswordAuthentication.getUserDataRaw().addOnCompleteListener(task -> {
+        userService.getUserDataRaw().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot documentSnapshot = task.getResult();
                 User user = documentSnapshot.toObject(User.class);
@@ -199,7 +196,7 @@ public class ProfileManagementFragment extends Fragment {
                     user.setName(editTextMainProfileManagementName.getText().toString());
                     user.setAge(editTextMainProfileManagementAge.getText().toString());
                     user.setPhone(editTextMainProfileManagementPhone.getText().toString());
-                    userService.setUserData(user);
+                    userService.setUser(user);
 
                     uploadImage();
 
@@ -215,15 +212,15 @@ public class ProfileManagementFragment extends Fragment {
     }
 
     private void uploadImage() {
-        if (internetStatus.isOnline()) {
+        if (appStatusService.isOnline()) {
             File file = new File(getCurrentPhotoPath());
             Uri fileUri = Uri.fromFile(file);
 
             if (fileUri != null) {
-                storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserEmail() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
+                storageReference.child("images/" + userService.getUserEmail() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         MainActivity mainActivity = (MainActivity) requireActivity();
-                        mainActivity.setAuthStatusViews(firebaseEmailPasswordAuthentication.isUserSignedIn());
+                        mainActivity.setAuthStatusViews(userService.isUserSignedIn());
                     } else {
                         Toast.makeText(requireContext(), "Lỗi, không thể cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
                     }

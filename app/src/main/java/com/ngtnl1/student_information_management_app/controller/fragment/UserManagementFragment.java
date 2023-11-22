@@ -31,7 +31,6 @@ import com.ngtnl1.student_information_management_app.R;
 import com.ngtnl1.student_information_management_app.controller.adapter.UserManagementAdapter;
 import com.ngtnl1.student_information_management_app.model.User;
 import com.ngtnl1.student_information_management_app.service.UserService;
-import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +143,7 @@ public class UserManagementFragment extends Fragment {
     }
 
     private void updateData() {
-        userService.getAllUser().addOnCompleteListener(queryDocumentSnapshots -> {
+        userService.findAllUser().addOnCompleteListener(queryDocumentSnapshots -> {
             if (queryDocumentSnapshots.isSuccessful()) {
                 items.clear();
                 for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
@@ -206,7 +205,7 @@ public class UserManagementFragment extends Fragment {
                 if (task.isSuccessful()) {
                     User user = new User(email, username, age, phone, isLocked, role);
 
-                    userService.createUserData(user).addOnSuccessListener(aVoid ->
+                    userService.createUser(user).addOnSuccessListener(aVoid ->
                             Toast.makeText(requireContext(), "Thêm người dùng thành công!", Toast.LENGTH_SHORT).show()
                     ).addOnFailureListener(e ->
                             Toast.makeText(requireContext(), "Thêm người dùng thất bại!", Toast.LENGTH_SHORT).show()
@@ -290,7 +289,7 @@ public class UserManagementFragment extends Fragment {
     }
 
     private void saveUserDetails() {
-        userService.setUserData(selectedUser).addOnSuccessListener(aVoid ->
+        userService.setUser(selectedUser).addOnSuccessListener(aVoid ->
                 Toast.makeText(requireContext(), "Lưu thông tin thành công!", Toast.LENGTH_SHORT).show()
         ).addOnFailureListener(e ->
                 Toast.makeText(requireContext(), "Lưu thông tin thất bại!", Toast.LENGTH_SHORT).show()

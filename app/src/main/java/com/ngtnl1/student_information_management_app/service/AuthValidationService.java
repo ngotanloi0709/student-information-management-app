@@ -1,12 +1,12 @@
-package com.ngtnl1.student_information_management_app.service.validation;
+package com.ngtnl1.student_information_management_app.service;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class AuthenticationInputValidator {
+public class AuthValidationService {
     @Inject
-    public AuthenticationInputValidator() {
+    public AuthValidationService() {
     }
     public boolean isEmailValid(String email) {
         return email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");

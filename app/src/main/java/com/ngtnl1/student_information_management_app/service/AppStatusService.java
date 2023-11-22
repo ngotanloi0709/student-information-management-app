@@ -1,4 +1,4 @@
-package com.ngtnl1.student_information_management_app.service.appstatus;
+package com.ngtnl1.student_information_management_app.service;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -7,14 +7,12 @@ import android.net.NetworkInfo;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import lombok.AllArgsConstructor;
-
 @Singleton
-public class InternetStatus {
+public class AppStatusService {
     private Context context;
 
     @Inject
-    public InternetStatus(Context context) {
+    public AppStatusService(Context context) {
         this.context = context;
     }
 
