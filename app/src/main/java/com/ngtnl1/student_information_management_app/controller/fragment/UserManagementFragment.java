@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
@@ -237,7 +238,7 @@ public class UserManagementFragment extends Fragment {
             showEditUserDetailsDialog();
             return true;
         } else if (id == R.id.menuMainItemUserDelete) {
-            // Xử lý sự kiện delete
+            showDeleteConfirmationDialog();
             return true;
         }
 
@@ -295,6 +296,28 @@ public class UserManagementFragment extends Fragment {
                 Toast.makeText(requireContext(), "Lưu thông tin thất bại!", Toast.LENGTH_SHORT).show()
         );
         updateData();
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Xác nhận xóa người dùng");
+
+        builder.setPositiveButton("Xóa", (dialog, which) -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+            userService.deleteUser(selectedUser.getEmail()).addOnSuccessListener(aVoid ->
+                    Toast.makeText(requireContext(), "Xóa người dùng thành công!", Toast.LENGTH_SHORT).show()
+            ).addOnFailureListener(e ->
+                    Toast.makeText(requireContext(), "Xóa người dùng thất bại!", Toast.LENGTH_SHORT).show()
+            );
+
+            updateData();
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
     }
 
     private void setUpFirebaseAdminInstance() {

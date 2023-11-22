@@ -22,6 +22,10 @@ public class BaseRepository<T> {
         db.setFirestoreSettings(settings);
     }
 
+    public Task<DocumentReference> create(T item) {
+        return db.collection(collectionName).add(item);
+    }
+
     public Task<Void> update(String id, T item) {
         return db.collection(collectionName).document(id).set(item);
     }
@@ -37,4 +41,6 @@ public class BaseRepository<T> {
     public Task<DocumentSnapshot> find(String id) {
         return db.collection(collectionName).document(id).get();
     }
+
+
 }

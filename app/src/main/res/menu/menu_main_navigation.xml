@@ -11,17 +11,17 @@
             android:id="@+id/menuItemMainHomepage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:title="Homepage" />
+            android:title="Danh sách sinh viên" />
         <item
             android:id="@+id/menuItemMainProfileManagement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:title="Profile Management" />
+            android:title="Thông tin cá nhân" />
         <item
             android:id="@+id/menuItemMainUserManagement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:title="User Management" />
+            android:title="Quản lý người dùng" />
 
     </group>
 
@@ -33,11 +33,11 @@
             android:id="@+id/menuItemMainLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:title="Login" />
+            android:title="Đăng nhập" />
         <item
             android:id="@+id/menuItemMainLogout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:title="Logout" />
+            android:title="Đăng xuất" />
     </group>
 </menu>
