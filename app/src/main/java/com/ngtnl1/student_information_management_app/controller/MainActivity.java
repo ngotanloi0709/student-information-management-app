@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initViews();
         configureDrawer();
         setDefaultFragment();
+        userService.isAdmin();
     }
 
     private void initViews() {
@@ -96,10 +97,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (itemId == R.id.menuItemMainHomepage) {
             selectedFragment = new StudentManagementFragment();
         } else if (itemId == R.id.menuItemMainUserManagement) {
-            if (appStatusService.isOnline()) {
-                selectedFragment = new UserManagementFragment();
-            } else {
+            if (!appStatusService.isOnline()) {
                 Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
+            } else if (!userService.isAdmin) {
+                Toast.makeText(this, "Bạn không có quyền truy cập.", Toast.LENGTH_SHORT).show();
+            } else {
+                selectedFragment = new UserManagementFragment();
             }
         } else if (itemId == R.id.menuItemMainProfileManagement) {
             if (appStatusService.isOnline()) {
@@ -170,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main_header, menu);
+
         return true;
     }
 

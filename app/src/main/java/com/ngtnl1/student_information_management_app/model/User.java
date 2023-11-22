@@ -18,6 +18,11 @@ public class User {
     private String role;
     private List<String> loginHistory;
 
+    public User(String email) {
+        this.email = email;
+        this.role = "USER";
+    }
+
     public User(String email, String name) {
         this.email = email;
         this.name = name;

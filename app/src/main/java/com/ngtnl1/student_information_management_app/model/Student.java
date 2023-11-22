@@ -11,10 +11,21 @@ public class Student {
     private String id;
     private String name;
     private String major;
-    private String major_class;
     private boolean isFemale;
-    private String birthday;
-    private String address;
+    private String age;
     private String email;
-    private String phoneNumber;
+    private String phone;
+
+    public Student(String name, String major, String sex, String age, String email, String phone) {
+        this.name = name;
+        this.major = major;
+        if (sex.equals("Nam")) {
+            this.isFemale = false;
+        } else {
+            this.isFemale = true;
+        }
+        this.age = age;
+        this.email = email;
+        this.phone = phone;
+    }
 }

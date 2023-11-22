@@ -13,7 +13,7 @@ public class UserRepository extends BaseRepository<User> {
         super("users");
     }
 
-    public Task<Void> create(User user) {
+    public Task<Void> createUser(User user) {
         return  db.collection(collectionName)
                 .document(user.getEmail())
                 .set(user);

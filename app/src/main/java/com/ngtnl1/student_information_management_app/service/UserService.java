@@ -1,5 +1,7 @@
 package com.ngtnl1.student_information_management_app.service;
 
+import android.content.Context;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,12 +25,15 @@ public class UserService {
     FirebaseAuth firebaseAuth;
     UserRepository userRepository;
     AppStatusService appStatusService;
+    Context context;
+    public boolean isAdmin = false;
 
     @Inject
-    public UserService(FirebaseAuth firebaseAuth, UserRepository userRepository, AppStatusService appStatusService) {
+    public UserService(FirebaseAuth firebaseAuth, UserRepository userRepository, AppStatusService appStatusService, Context context) {
         this.firebaseAuth = firebaseAuth;
         this.userRepository = userRepository;
         this.appStatusService = appStatusService;
+        this.context = context;
     }
 
     public Task<AuthResult> logIn(String email, String password) {
@@ -36,16 +41,32 @@ public class UserService {
             getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
                 User user = documentSnapshot.toObject(User.class);
 
-                addLoginHistory(user);
+                if (user == null) {
+                    user = new User(email);
+                }
 
+                addLoginHistory(user);
                 userRepository.update(user.getEmail(), user);
             });
         });
     }
 
+    public boolean isAdmin() {
+        getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+            User user = documentSnapshot.toObject(User.class);
+
+            if (user != null) {
+                isAdmin = user.getRole().equals("ADMIN");
+            }
+        });
+
+        return isAdmin;
+    }
+
     private void addLoginHistory(User user) {
         List<String> loginHistory = user.getLoginHistory();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+
         if (loginHistory != null) {
             loginHistory.add(sdf.format(new Date(System.currentTimeMillis())));
             user.setLoginHistory(loginHistory);
@@ -64,7 +85,7 @@ public class UserService {
 
                         addLoginHistory(user);
 
-                        return userRepository.create(user)
+                        return userRepository.createUser(user)
                                 .continueWithTask(createTask -> {
                                     if (createTask.isSuccessful()) {
                                         return task;
@@ -95,7 +116,11 @@ public class UserService {
     }
 
     public Task<Void> createUser(User user) {
-        return userRepository.create(user);
+        return userRepository.createUser(user);
+    }
+
+    public Task<Void> deleteUser(String email) {
+        return userRepository.remove(email);
     }
 
     public boolean isUserSignedIn() {

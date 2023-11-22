@@ -76,7 +76,7 @@ public class UserManagementAdapter extends RecyclerView.Adapter<UserManagementAd
 
         void bind(User user) {
             textViewMainUserManagementName.setText(user.getName());
-            textViewMainUserManagementAge.setText(user.getAge() + "");
+            textViewMainUserManagementAge.setText(user.getAge());
             textViewMainUserManagementEmail.setText(user.getEmail());
             textViewMainUserManagementPhone.setText(user.getPhone());
             setProfileImage(user.getEmail());
