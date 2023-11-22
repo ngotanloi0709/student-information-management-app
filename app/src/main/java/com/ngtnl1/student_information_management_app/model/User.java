@@ -10,19 +10,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class User {
-    private String id;
     private String email;
-    private String name;
-    private String age;
-    private String phone;
-    private boolean isLocked;
+    private String name = "";
+    private String age = "";
+    private String phone = "";
+    private boolean isLocked = false;
     private String role;
     private List<String> loginHistory;
 
-    public User(String id, String email, String name) {
-        this.id = id;
+    public User(String email, String name) {
         this.email = email;
         this.name = name;
         this.role = "USER";
+    }
+
+    public User(String email, String username, String age, String phone, boolean isLocked, String role) {
+        this.email = email;
+        this.name = username;
+        this.age = age;
+        this.phone = phone;
+        this.isLocked = isLocked;
+        this.role = role;
     }
 }

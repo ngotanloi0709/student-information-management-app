@@ -120,7 +120,7 @@ public class ProfileManagementFragment extends Fragment {
 
     private void setProfileImage() {
         if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
-            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
                 Glide.with(this).load(uri).into(imageMainProfileManagementAvatar);
             }).addOnFailureListener(exception -> {
                 Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
@@ -220,7 +220,7 @@ public class ProfileManagementFragment extends Fragment {
             Uri fileUri = Uri.fromFile(file);
 
             if (fileUri != null) {
-                storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
+                storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserEmail() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         MainActivity mainActivity = (MainActivity) requireActivity();
                         mainActivity.setAuthStatusViews(firebaseEmailPasswordAuthentication.isUserSignedIn());

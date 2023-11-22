@@ -38,7 +38,7 @@ public class FirebaseEmailPasswordAuthentication {
 
                 addLoginHistory(user);
 
-                userRepository.update(user.getId(), user);
+                userRepository.update(user.getEmail(), user);
             });
         });
     }
@@ -60,7 +60,7 @@ public class FirebaseEmailPasswordAuthentication {
         return firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .continueWithTask(task -> {
                     if (task.isSuccessful()) {
-                        User user = new User(firebaseAuth.getUid(), email, username);
+                        User user = new User(email, username);
 
                         addLoginHistory(user);
 
@@ -78,12 +78,35 @@ public class FirebaseEmailPasswordAuthentication {
                 });
     }
 
+    public Task<Void> createUser(String email, String password, String username, String age, String phone, boolean isLocked, String role){
+        return firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .continueWithTask(task -> {
+                    if (task.isSuccessful()) {
+                        User user = new User(email, username, age, phone, isLocked, role);
+                        addLoginHistory(user);
+
+                        return userRepository.create(user);
+                    } else {
+                        Exception exception = task.getException();
+                        if (exception != null) {
+                            throw exception;
+                        }
+                        return null;
+                    }
+                });
+    }
+
+
     public Task<DocumentSnapshot> getUserDataRaw() {
-        return userRepository.find(getUserUid());
+        return userRepository.find(getUserEmail());
     }
 
     public String getUserUid() {
         return firebaseAuth.getCurrentUser().getUid();
+    }
+
+    public String getUserEmail() {
+        return firebaseAuth.getCurrentUser().getEmail();
     }
 
     public boolean isUserSignedIn() {

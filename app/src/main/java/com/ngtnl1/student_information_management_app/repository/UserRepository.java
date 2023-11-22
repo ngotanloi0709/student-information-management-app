@@ -17,7 +17,7 @@ public class UserRepository extends BaseRepository<User> {
 
     public Task<Void> create(User user) {
         return  db.collection(collectionName)
-                .document(user.getId())
+                .document(user.getEmail())
                 .set(user);
     }
 

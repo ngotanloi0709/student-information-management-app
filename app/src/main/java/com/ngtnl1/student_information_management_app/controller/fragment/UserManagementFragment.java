@@ -8,10 +8,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +22,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
@@ -37,14 +42,16 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class UserManagementFragment extends Fragment {
-    private List<User> items;
-    private UserManagementAdapter adapter;
-    private RecyclerView recyclerView;
-    private User selectedUser;
     @Inject
     UserService userService;
     @Inject
     StorageReference storageReference;
+    private List<User> items;
+    private UserManagementAdapter adapter;
+    private RecyclerView recyclerView;
+    private Button buttonMainUserManagementCreateUser;
+    private User selectedUser;
+    private FirebaseAuth firebaseAuthAdmin;
 
     public UserManagementFragment() {
         // Required empty public constructor
@@ -63,10 +70,13 @@ public class UserManagementFragment extends Fragment {
 
         initViews();
         setupRecyclerView();
+        setOnClickListener();
+        setUpFirebaseAdminInstance();
     }
 
     private void initViews() {
         recyclerView = requireView().findViewById(R.id.recyclerViewMainUserManagement);
+        buttonMainUserManagementCreateUser = requireView().findViewById(R.id.buttonMainUserManagementCreateUser);
     }
 
     private void setupRecyclerView() {
@@ -92,10 +102,125 @@ public class UserManagementFragment extends Fragment {
         updateData();
     }
 
+    private void showUserDetailsDialog(User user) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Thông tin người dùng");
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_user_detail, null);
+
+        TextView textViewDialogUserDetailName = view.findViewById(R.id.editTextDialogUserDetailName);
+        TextView textViewDialogUserDetailAge = view.findViewById(R.id.editTextDialogUserDetailAge);
+        TextView textViewDialogUserDetailEmail = view.findViewById(R.id.textViewDialogUserDetailEmail);
+        TextView textViewDialogUserDetailPhone = view.findViewById(R.id.editTextDialogUserDetailPhone);
+        TextView textViewDialogUserDetailIsLocked = view.findViewById(R.id.textViewDialogUserDetailIsLocked);
+        TextView textViewDialogUserDetailRole = view.findViewById(R.id.textViewDialogUserDetailRole);
+        TextView textViewDialogUserDetailLoginHistory = view.findViewById(R.id.textViewDialogUserDetailLoginHistory);
+
+        textViewDialogUserDetailName.setText(user.getName());
+        textViewDialogUserDetailAge.setText(user.getAge() + "");
+        textViewDialogUserDetailEmail.setText(user.getEmail());
+        textViewDialogUserDetailPhone.setText(user.getPhone());
+        textViewDialogUserDetailIsLocked.setText(user.isLocked() ? "Đã khóa" : "Chưa khóa");
+        textViewDialogUserDetailRole.setText(user.getRole());
+        textViewDialogUserDetailLoginHistory.append("\n");
+
+        if (user.getLoginHistory() != null) {
+            for (String loginHistory : user.getLoginHistory()) {
+                textViewDialogUserDetailLoginHistory.append(loginHistory + "\n");
+            }
+        }
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
     private void showContextMenu() {
         registerForContextMenu(recyclerView);
         getActivity().openContextMenu(recyclerView);
         unregisterForContextMenu(recyclerView);
+    }
+
+    private void updateData() {
+        userService.getAllUser().addOnCompleteListener(queryDocumentSnapshots -> {
+            if (queryDocumentSnapshots.isSuccessful()) {
+                items.clear();
+                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
+                    User user = documentSnapshot.toObject(User.class);
+
+                    if (user != null) {
+                        items.add(user);
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void setOnClickListener() {
+        buttonMainUserManagementCreateUser.setOnClickListener(v -> {
+            showCreateUserDialog();
+        });
+    }
+
+    private void showCreateUserDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Thêm người dùng");
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_create_user, null);
+
+        EditText editTextDialogCreateUserName = view.findViewById(R.id.editTextDialogCreateUserName);
+        EditText editTextDialogCreateUserEmail = view.findViewById(R.id.editTextDialogCreateUserEmail);
+        EditText editTextDialogCreateUserPassword = view.findViewById(R.id.editTextDialogCreateUserPassword);
+        EditText editTextDialogCreateUserAge = view.findViewById(R.id.editTextDialogCreateUserAge);
+        EditText editTextDialogCreateUserPhone = view.findViewById(R.id.editTextDialogCreateUserPhone);
+        CheckBox checkBoxDialogCreateUserIsLocked = view.findViewById(R.id.checkBoxDialogCreateUserIsLocked);
+        Spinner spinnerDialogCreateUserRole = view.findViewById(R.id.spinnerDialogCreateUserRole);
+
+        List<String> data = new ArrayList<>();
+        data.add("GUEST");
+        data.add("USER");
+        data.add("ADMIN");
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, data);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDialogCreateUserRole.setAdapter(spinnerAdapter);
+        int defaultPosition = spinnerAdapter.getPosition("USER");
+        spinnerDialogCreateUserRole.setSelection(defaultPosition);
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Thêm người dùng", (dialog, which) -> {
+            String username = editTextDialogCreateUserName.getText().toString();
+            String email = editTextDialogCreateUserEmail.getText().toString();
+            String password = editTextDialogCreateUserPassword.getText().toString();
+            String age = editTextDialogCreateUserAge.getText().toString();
+            String phone = editTextDialogCreateUserPhone.getText().toString();
+            boolean isLocked = checkBoxDialogCreateUserIsLocked.isChecked();
+            String role = spinnerDialogCreateUserRole.getSelectedItem().toString();
+
+            firebaseAuthAdmin.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    User user = new User(email, username, age, phone, isLocked, role);
+
+                    userService.createUserData(user).addOnSuccessListener(aVoid ->
+                            Toast.makeText(requireContext(), "Thêm người dùng thành công!", Toast.LENGTH_SHORT).show()
+                    ).addOnFailureListener(e ->
+                            Toast.makeText(requireContext(), "Thêm người dùng thất bại!", Toast.LENGTH_SHORT).show()
+                    );
+                    updateData();
+                } else {
+                    Toast.makeText(requireContext(), "Thêm người dùng thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            dialog.dismiss();
+        });
+
+        builder.show();
     }
 
     @Override
@@ -120,41 +245,6 @@ public class UserManagementFragment extends Fragment {
         return super.onContextItemSelected(item);
     }
 
-    private void showUserDetailsDialog(User user) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Thông tin người dùng");
-
-        View view = getLayoutInflater().inflate(R.layout.dialog_user_detail, null);
-
-        TextView textViewDialogUserDetailName = view.findViewById(R.id.editTextDialogUserDetailName);
-        TextView textViewDialogUserDetailAge = view.findViewById(R.id.editTextDialogUserDetailAge);
-        TextView textViewDialogUserDetailEmail = view.findViewById(R.id.textViewDialogUserDetailEmail);
-        TextView textViewDialogUserDetailPhone = view.findViewById(R.id.editTextDialogUserDetailPhone);
-        TextView textViewDialogUserDetailIsLocked = view.findViewById(R.id.textViewDialogUserDetailIsLocked);
-        TextView textViewDialogUserDetailRole = view.findViewById(R.id.textViewDialogUserDetailRole);
-        TextView textViewDialogUserDetailLoginHistory = view.findViewById(R.id.textViewDialogUserDetailLoginHistory);
-
-        textViewDialogUserDetailName.setText(user.getName());
-        textViewDialogUserDetailAge.setText(user.getAge());
-        textViewDialogUserDetailEmail.setText(user.getEmail());
-        textViewDialogUserDetailPhone.setText(user.getPhone());
-        textViewDialogUserDetailIsLocked.setText(user.isLocked() ? "Đã khóa" : "Chưa khóa");
-        textViewDialogUserDetailRole.setText(user.getRole());
-        textViewDialogUserDetailLoginHistory.append("\n");
-
-        if (user.getLoginHistory() != null) {
-            for (String loginHistory : user.getLoginHistory()) {
-                textViewDialogUserDetailLoginHistory.append(loginHistory + "\n");
-            }
-        }
-
-        builder.setView(view);
-
-        builder.setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss());
-
-        builder.show();
-    }
-
     private void showEditUserDetailsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Thay đổi thông tin người dùng");
@@ -173,7 +263,7 @@ public class UserManagementFragment extends Fragment {
         data.add("ADMIN");
 
         editTextDialogEditUserDetailName.setText(selectedUser.getName());
-        editTextDialogEditUserDetailAge.setText(selectedUser.getAge());
+        editTextDialogEditUserDetailAge.setText(selectedUser.getAge() + "");
         editTextDialogEditUserDetailPhone.setText(selectedUser.getPhone());
         checkBoxDialogEditUserDetailIsLocked.setChecked(selectedUser.isLocked());
 
@@ -200,24 +290,23 @@ public class UserManagementFragment extends Fragment {
     }
 
     private void saveUserDetails() {
-        userService.setUserData(selectedUser);
+        userService.setUserData(selectedUser).addOnSuccessListener(aVoid ->
+                Toast.makeText(requireContext(), "Lưu thông tin thành công!", Toast.LENGTH_SHORT).show()
+        ).addOnFailureListener(e ->
+                Toast.makeText(requireContext(), "Lưu thông tin thất bại!", Toast.LENGTH_SHORT).show()
+        );
         updateData();
     }
 
-    private void updateData() {
-        userService.getAllUser().addOnCompleteListener(queryDocumentSnapshots -> {
-            if (queryDocumentSnapshots.isSuccessful()) {
-                items.clear();
-                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
-                    User user = documentSnapshot.toObject(User.class);
+    private void setUpFirebaseAdminInstance() {
+        FirebaseOptions firebaseOptions = new FirebaseOptions.Builder()
+                .setApiKey("AIzaSyDg6LaXrusPd0vxF8tXSHdmCmBhKyWYn2U")
+                .setApplicationId("student-infor-management-app").build();
 
-                    if (user != null) {
-                        items.add(user);
-                    }
-                }
-
-                adapter.notifyDataSetChanged();
-            }
-        });
+        try {FirebaseApp myApp = FirebaseApp.initializeApp(requireContext(), firebaseOptions, "student-infor-management-app");
+            firebaseAuthAdmin = FirebaseAuth.getInstance(myApp);
+        } catch (IllegalStateException e){
+            firebaseAuthAdmin = FirebaseAuth.getInstance(FirebaseApp.getInstance("student-infor-management-app"));
+        }
     }
 }
