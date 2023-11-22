@@ -9,8 +9,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.ngtnl1.student_information_management_app.R;
-import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
-import com.ngtnl1.student_information_management_app.service.validation.AuthenticationInputValidator;
+import com.ngtnl1.student_information_management_app.service.UserService;
+import com.ngtnl1.student_information_management_app.service.AuthValidationService;
 
 import javax.inject.Inject;
 
@@ -19,9 +19,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity {
     @Inject
-    FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
+    UserService userService;
     @Inject
-    AuthenticationInputValidator authenticationInputValidator;
+    AuthValidationService authValidationService;
     private EditText editTextLoginEmail;
     private EditText editTextLoginPassword;
     private Button buttonLoginLogin;
@@ -54,13 +54,13 @@ public class LoginActivity extends AppCompatActivity {
         String password = editTextLoginPassword.getText().toString();
 
         if (isValidInput(email, password)) {
-            firebaseEmailPasswordAuthentication.logIn(email, password)
+            userService.logIn(email, password)
                     .addOnSuccessListener(authResult -> {
                         Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         changeToMain();
                     })
                     .addOnFailureListener(e -> {
-                        String errorMessage = firebaseEmailPasswordAuthentication.getFirebaseErrorMessage(e);
+                        String errorMessage = userService.getFirebaseErrorMessage(e);
                         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
                     });
         }
@@ -73,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
             editTextLoginPassword.setError("Vui lòng nhập mật khẩu!");
             editTextLoginPassword.requestFocus();
             isValid = false;
-        } else if (!authenticationInputValidator.isPasswordValid(password)) {
+        } else if (!authValidationService.isPasswordValid(password)) {
             editTextLoginPassword.setError("Mật khẩu cần ít nhất 6 ký tự!");
             editTextLoginPassword.requestFocus();
             isValid = false;
@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
             editTextLoginEmail.setError("Vui lòng nhập email!");
             editTextLoginEmail.requestFocus();
             isValid = false;
-        } else if (!authenticationInputValidator.isEmailValid(email)) {
+        } else if (!authValidationService.isEmailValid(email)) {
             editTextLoginEmail.setError("Email không hợp lệ!");
             editTextLoginEmail.requestFocus();
             isValid = false;
@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
+        if (userService.isUserSignedIn()) {
             changeToMain();
         }
     }

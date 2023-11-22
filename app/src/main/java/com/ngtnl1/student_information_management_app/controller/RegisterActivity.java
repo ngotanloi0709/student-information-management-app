@@ -9,8 +9,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.ngtnl1.student_information_management_app.R;
-import com.ngtnl1.student_information_management_app.service.authentication.FirebaseEmailPasswordAuthentication;
-import com.ngtnl1.student_information_management_app.service.validation.AuthenticationInputValidator;
+import com.ngtnl1.student_information_management_app.service.UserService;
+import com.ngtnl1.student_information_management_app.service.AuthValidationService;
 
 import javax.inject.Inject;
 
@@ -19,9 +19,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class RegisterActivity extends AppCompatActivity {
     @Inject
-    FirebaseEmailPasswordAuthentication firebaseEmailPasswordAuthentication;
+    UserService userService;
     @Inject
-    AuthenticationInputValidator authenticationInputValidator;
+    AuthValidationService authValidationService;
     private EditText editTextRegisterUsername;
     private EditText editTextRegisterEmail;
     private EditText editTextRegisterPassword;
@@ -59,14 +59,14 @@ public class RegisterActivity extends AppCompatActivity {
         String repeatPassword = editTextRegisterRepeatPassword.getText().toString();
 
         if (isValidInput(username, email, password, repeatPassword)) {
-            firebaseEmailPasswordAuthentication.register(email, password, username)
+            userService.register(email, password, username)
                     .addOnSuccessListener(authResult -> {
                         Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                         finish();
                     })
                     .addOnFailureListener(e -> {
-                        String errorMessage = firebaseEmailPasswordAuthentication.getFirebaseErrorMessage(e);
+                        String errorMessage = userService.getFirebaseErrorMessage(e);
                         Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     });
         }
@@ -83,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
             editTextRegisterPassword.setError("Mật khẩu cần ít nhất 6 ký tự!");
             editTextRegisterPassword.requestFocus();
             isValid = false;
-        } else if (!authenticationInputValidator.isRepeatPasswordValid(password, editTextRegisterRepeatPassword.getText().toString())) {
+        } else if (!authValidationService.isRepeatPasswordValid(password, editTextRegisterRepeatPassword.getText().toString())) {
             editTextRegisterRepeatPassword.setError("Mật khẩu nhập lại không khớp!");
             editTextRegisterRepeatPassword.requestFocus();
             isValid = false;
@@ -94,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
             editTextRegisterEmail.setError("Vui lòng nhập email!");
             editTextRegisterEmail.requestFocus();
             isValid = false;
-        } else if (!authenticationInputValidator.isEmailValid(email)) {
+        } else if (!authValidationService.isEmailValid(email)) {
             editTextRegisterEmail.setError("Email không hợp lệ!");
             editTextRegisterEmail.requestFocus();
             isValid = false;
@@ -104,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
             editTextRegisterUsername.setError("Vui lòng nhập tên người dùng!");
             editTextRegisterUsername.requestFocus();
             isValid = false;
-        } else if (!authenticationInputValidator.isUsernameValid(username)) {
+        } else if (!authValidationService.isUsernameValid(username)) {
             editTextRegisterUsername.setError("Tên người dùng không hợp lệ!");
             editTextRegisterUsername.requestFocus();
             isValid = false;
@@ -123,7 +123,7 @@ public class RegisterActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        if (firebaseEmailPasswordAuthentication.isUserSignedIn()) {
+        if (userService.isUserSignedIn()) {
             finish();
         }
     }
