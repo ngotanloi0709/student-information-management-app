@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setProfileImage() {
         if (firebaseEmailPasswordAuthentication.isUserSignedIn() && internetStatus.isOnline()) {
-            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserUid() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+            storageReference.child("images/" + firebaseEmailPasswordAuthentication.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
                 Glide.with(this).load(uri).into(imageMainAvatar);
             }).addOnFailureListener(exception -> {
                 Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
