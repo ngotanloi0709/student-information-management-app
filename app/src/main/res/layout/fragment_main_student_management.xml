@@ -6,13 +6,25 @@
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <Button
+        android:id="@+id/buttonSortStudentManagement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="SORT" />
+
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchViewStudentManagement">
+    </SearchView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMainStudentManagement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1">
     </androidx.recyclerview.widget.RecyclerView>
-
     <Button
         android:id="@+id/buttonMainStudentManagementCreateStudent"
         android:layout_width="match_parent"

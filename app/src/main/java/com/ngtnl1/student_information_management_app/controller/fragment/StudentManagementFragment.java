@@ -1,5 +1,6 @@
 package com.ngtnl1.student_information_management_app.controller.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import android.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,6 +33,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import android.widget.SearchView;
 
 @AndroidEntryPoint
 public class StudentManagementFragment extends Fragment {
@@ -59,6 +62,7 @@ public class StudentManagementFragment extends Fragment {
         initViews();
         setupRecyclerView();
         setOnClickListener();
+        initSearchWidgets(view);
     }
 
     private void initViews() {
@@ -126,12 +130,11 @@ public class StudentManagementFragment extends Fragment {
                         items.add(student);
                     }
                 }
-
                 adapter.notifyDataSetChanged();
             }
         });
     }
-    
+
     private void setOnClickListener() {
         buttonMainStudentManagementCreateStudent.setOnClickListener(v -> {
             showCreateStudentDialog();
@@ -199,5 +202,34 @@ public class StudentManagementFragment extends Fragment {
         super.onResume();
 
         updateData();
+    }
+
+    private void initSearchWidgets(View view){
+        SearchView searchView = (SearchView) view.findViewById(R.id.searchViewStudentManagement);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    // If the search query is empty, display the original list
+                    updateData();
+                } else {
+                    List<Student> filteredStudents = new ArrayList<>();
+                    for (Student student : items) {
+                        if (student.getName().toLowerCase().contains(newText.toLowerCase())) {
+                            filteredStudents.add(student);
+                        }
+                    }
+                    StudentManagementAdapter adapter = new StudentManagementAdapter(filteredStudents);
+                    recyclerView.setAdapter(adapter);
+                }
+                return false;
+            }
+
+        });
     }
 }

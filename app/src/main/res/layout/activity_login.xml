@@ -9,6 +9,14 @@
     android:padding="20dp"
     tools:context=".controller.LoginActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in"
+        android:textColor="#B388FF"
+        android:textSize="100dp"
+        android:textStyle="bold"></TextView>
+
     <EditText
         android:id="@+id/editTextLoginEmail"
         android:layout_width="match_parent"

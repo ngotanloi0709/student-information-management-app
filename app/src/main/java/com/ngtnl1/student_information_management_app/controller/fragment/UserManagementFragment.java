@@ -181,14 +181,14 @@ public class UserManagementFragment extends Fragment {
         Spinner spinnerDialogCreateUserRole = view.findViewById(R.id.spinnerDialogCreateUserRole);
 
         List<String> data = new ArrayList<>();
-        data.add("GUEST");
-        data.add("USER");
+        data.add("MANAGER");
+        data.add("EMPLOYEE");
         data.add("ADMIN");
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, data);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDialogCreateUserRole.setAdapter(spinnerAdapter);
-        int defaultPosition = spinnerAdapter.getPosition("USER");
+        int defaultPosition = spinnerAdapter.getPosition("EMPLOYEE");
         spinnerDialogCreateUserRole.setSelection(defaultPosition);
 
         builder.setView(view);
@@ -216,10 +216,8 @@ public class UserManagementFragment extends Fragment {
                     Toast.makeText(requireContext(), "Thêm người dùng thất bại!", Toast.LENGTH_SHORT).show();
                 }
             });
-
             dialog.dismiss();
         });
-
         builder.show();
     }
 
@@ -241,7 +239,6 @@ public class UserManagementFragment extends Fragment {
             showDeleteConfirmationDialog();
             return true;
         }
-
         return super.onContextItemSelected(item);
     }
 
@@ -258,8 +255,8 @@ public class UserManagementFragment extends Fragment {
         Spinner spinnerDialogEditUserDetailRole = view.findViewById(R.id.spinnerDialogEditUserDetailRole);
 
         List<String> data = new ArrayList<>();
-        data.add("GUEST");
-        data.add("USER");
+        data.add("MANAGER");
+        data.add("EMPLOYEE");
         data.add("ADMIN");
 
         editTextDialogEditUserDetailName.setText(selectedUser.getName());
@@ -316,7 +313,6 @@ public class UserManagementFragment extends Fragment {
         });
 
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
-
         builder.show();
     }
 

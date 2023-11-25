@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.menuItemMainUserManagement) {
             if (!appStatusService.isOnline()) {
                 Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
-            } else if (!userService.isAdmin) {
+            } else if (userService.isManager()) {
                 Toast.makeText(this, "Bạn không có quyền truy cập.", Toast.LENGTH_SHORT).show();
             } else {
                 selectedFragment = new UserManagementFragment();
@@ -173,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main_header, menu);
-
         return true;
     }
 

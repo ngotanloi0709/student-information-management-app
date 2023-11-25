@@ -27,6 +27,9 @@ public class UserService {
     AppStatusService appStatusService;
     Context context;
     public boolean isAdmin = false;
+    public boolean isManager = false;
+    public boolean isEmployee = false;
+
 
     @Inject
     public UserService(FirebaseAuth firebaseAuth, UserRepository userRepository, AppStatusService appStatusService, Context context) {
@@ -54,13 +57,31 @@ public class UserService {
     public boolean isAdmin() {
         getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
             User user = documentSnapshot.toObject(User.class);
-
             if (user != null) {
                 isAdmin = user.getRole().equals("ADMIN");
             }
         });
-
         return isAdmin;
+    }
+
+    public boolean isManager() {
+        getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+            User user = documentSnapshot.toObject(User.class);
+            if (user != null) {
+                isManager = user.getRole().equals("MANAGER");
+            }
+        });
+        return isManager;
+    }
+
+    public boolean isEmployee() {
+        getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
+            User user = documentSnapshot.toObject(User.class);
+            if (user != null) {
+                isEmployee = user.getRole().equals("EMPLOYEE");
+            }
+        });
+        return isEmployee;
     }
 
     private void addLoginHistory(User user) {
@@ -82,9 +103,7 @@ public class UserService {
                 .continueWithTask(task -> {
                     if (task.isSuccessful()) {
                         User user = new User(email, username);
-
                         addLoginHistory(user);
-
                         return userRepository.createUser(user)
                                 .continueWithTask(createTask -> {
                                     if (createTask.isSuccessful()) {
@@ -132,7 +151,6 @@ public class UserService {
             if (!appStatusService.isOnline()) {
                 return "Không có kết nối internet.";
             }
-
             switch (Objects.requireNonNull(exception.getMessage())) {
                 case "An internal error has occurred. [ INVALID_LOGIN_CREDENTIALS ]":
                     return "Sai tên email hoặc mật khẩu.";
