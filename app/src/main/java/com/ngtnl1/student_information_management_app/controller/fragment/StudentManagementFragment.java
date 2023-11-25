@@ -1,10 +1,12 @@
 package com.ngtnl1.student_information_management_app.controller.fragment;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -28,6 +30,8 @@ import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.service.StudentService;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -43,7 +47,6 @@ public class StudentManagementFragment extends Fragment {
     private StudentManagementAdapter adapter;
     private RecyclerView recyclerView;
     private Button buttonMainStudentManagementCreateStudent;
-
     public StudentManagementFragment() {
         // Required empty public constructor
     }
@@ -51,7 +54,6 @@ public class StudentManagementFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_student_management, container, false);
-
         return view;
     }
 
@@ -63,6 +65,7 @@ public class StudentManagementFragment extends Fragment {
         setupRecyclerView();
         setOnClickListener();
         initSearchWidgets(view);
+        sortStudentManagement();
     }
 
     private void initViews() {
@@ -81,7 +84,6 @@ public class StudentManagementFragment extends Fragment {
             @Override
             public void onButtonDetailClick(int position, Student student) {
                 requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new StudentDetailFragment(student)).addToBackStack(null).commit();
-
             }
 
             @Override
@@ -89,7 +91,6 @@ public class StudentManagementFragment extends Fragment {
                 showDeleteStudentDialog(student);
             }
         });
-
         updateData();
     }
 
@@ -197,6 +198,56 @@ public class StudentManagementFragment extends Fragment {
         builder.show();
     }
 
+    private void sortStudentManagement() {
+        // Use the existing spinner in your layout
+        View view = getLayoutInflater().inflate(R.layout.fragment_main_student_management, null);
+        Spinner spinnerSortStudentManagement = requireView().findViewById(R.id.spinnerSortStudentManagement);
+
+        List<String> sortType = new ArrayList<>();
+        sortType.add("A to Z");
+        sortType.add("Z to A");
+        sortType.add("Major");
+        sortType.add("Age");
+
+        ArrayAdapter<String> spinnerAdapterSort = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, sortType);
+        spinnerAdapterSort.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSortStudentManagement.setAdapter(spinnerAdapterSort);
+
+        // Set a listener to handle sorting when an item is selected
+        spinnerSortStudentManagement.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                String selectedSortOption = spinnerSortStudentManagement.getSelectedItem().toString();
+                performSort(selectedSortOption);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing here
+            }
+        });
+    }
+
+    private void performSort(String selectedSortOption) {
+        switch (selectedSortOption) {
+            case "A to Z":
+                Collections.sort(items, (s1, s2) -> s1.getName().compareToIgnoreCase(s2.getName()));
+                break;
+            case "Z to A":
+                Collections.sort(items, (s1, s2) -> s2.getName().compareToIgnoreCase(s1.getName()));
+                break;
+            case "Major":
+                Collections.sort(items, (s1, s2) -> s1.getMajor().compareToIgnoreCase(s2.getMajor()));
+                break;
+            case "Age":
+                Collections.sort(items, (s1, s2) -> Integer.compare(Integer.parseInt(s1.getAge()), Integer.parseInt(s2.getAge())));
+                break;
+        }
+
+        // Notify the adapter that the data set has changed
+        adapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -220,7 +271,7 @@ public class StudentManagementFragment extends Fragment {
                 } else {
                     List<Student> filteredStudents = new ArrayList<>();
                     for (Student student : items) {
-                        if (student.getName().toLowerCase().contains(newText.toLowerCase())) {
+                        if (student.getName().toLowerCase().contains(newText.toLowerCase()) || student.getMajor().toLowerCase().contains(newText.toLowerCase())) {
                             filteredStudents.add(student);
                         }
                     }

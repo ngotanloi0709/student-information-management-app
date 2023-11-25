@@ -6,16 +6,16 @@
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Button
-        android:id="@+id/buttonSortStudentManagement"
+    <Spinner
+        android:id="@+id/spinnerSortStudentManagement"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="SORT" />
+        android:layout_height="wrap_content" />
 
     <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:queryHint="Search by Name or Major"
+        android:iconifiedByDefault="false"
         android:id="@+id/searchViewStudentManagement">
     </SearchView>
 
@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
     </androidx.recyclerview.widget.RecyclerView>
+
     <Button
         android:id="@+id/buttonMainStudentManagementCreateStudent"
         android:layout_width="match_parent"
