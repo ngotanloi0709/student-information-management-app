@@ -1,7 +1,5 @@
 package com.ngtnl1.student_information_management_app.controller.fragment;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -26,19 +23,16 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.ngtnl1.student_information_management_app.R;
 import com.ngtnl1.student_information_management_app.controller.adapter.StudentManagementAdapter;
 import com.ngtnl1.student_information_management_app.model.Student;
-import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.service.StudentService;
 import com.ngtnl1.student_information_management_app.service.UserService;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import android.widget.SearchView;
 
 @AndroidEntryPoint
 public class StudentManagementFragment extends Fragment {
