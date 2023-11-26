@@ -24,6 +24,7 @@ import com.ngtnl1.student_information_management_app.model.Certificate;
 import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.service.CertificateService;
 import com.ngtnl1.student_information_management_app.service.StudentService;
+import com.ngtnl1.student_information_management_app.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,8 @@ public class StudentDetailFragment extends Fragment {
     private TextView textViewMainStudentDetailPhone;
     private Button buttonMainStudentDetailEdit;
     private Button buttonMainStudentDetailAddCertificate;
+    @Inject
+    UserService userService;
 
     public StudentDetailFragment(Student student) {
         this.student = student;
@@ -118,6 +121,11 @@ public class StudentDetailFragment extends Fragment {
         adapter.setOnStudentDetailItemClickListener(new StudentDetailAdapter.OnStudentDetailItemClickListener() {
             @Override
             public void onButtonDeleteClick(int position, Certificate certificate) {
+                if (userService.current_role.equals("EMPLOYEE")) {
+                    Toast.makeText(requireContext(), "Bạn không có xóa chứng chỉ của sinh viên", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 showDeleteStudentDialog(certificate);
             }
         });
@@ -127,10 +135,20 @@ public class StudentDetailFragment extends Fragment {
 
     private void setOnClickListener() {
         buttonMainStudentDetailEdit.setOnClickListener(v -> {
+            if (userService.current_role.equals("EMPLOYEE")) {
+                Toast.makeText(requireContext(), "Bạn không có quyền sửa sinh viên", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             showEditStudentDialog();
         });
 
         buttonMainStudentDetailAddCertificate.setOnClickListener(v -> {
+            if (userService.current_role.equals("EMPLOYEE")) {
+                Toast.makeText(requireContext(), "Bạn không có quyền thêm chứng chỉ cho sinh viên", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             showAddCertificateDialog();
         });
     }

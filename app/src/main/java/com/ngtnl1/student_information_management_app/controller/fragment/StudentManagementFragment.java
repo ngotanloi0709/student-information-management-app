@@ -28,6 +28,7 @@ import com.ngtnl1.student_information_management_app.controller.adapter.StudentM
 import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.service.StudentService;
+import com.ngtnl1.student_information_management_app.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +42,8 @@ import android.widget.SearchView;
 
 @AndroidEntryPoint
 public class StudentManagementFragment extends Fragment {
+    @Inject
+    UserService userService;
     @Inject
     StudentService studentService;
     private List<Student> items;
@@ -88,6 +91,11 @@ public class StudentManagementFragment extends Fragment {
 
             @Override
             public void onButtonDeleteClick(int position, Student student) {
+                if (userService.current_role.equals("EMPLOYEE")) {
+                    Toast.makeText(requireContext(), "Bạn không có quyền xóa sinh viên", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 showDeleteStudentDialog(student);
             }
         });

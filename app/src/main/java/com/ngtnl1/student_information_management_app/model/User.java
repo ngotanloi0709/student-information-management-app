@@ -20,13 +20,13 @@ public class User {
 
     public User(String email) {
         this.email = email;
-        this.role = "USER";
+        this.role = "EMPLOYEE";
     }
 
     public User(String email, String name) {
         this.email = email;
         this.name = name;
-        this.role = "USER";
+        this.role = "EMPLOYEE";
     }
 
     public User(String email, String username, String age, String phone, boolean isLocked, String role) {
