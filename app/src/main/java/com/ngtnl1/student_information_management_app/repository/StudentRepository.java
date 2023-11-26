@@ -12,16 +12,5 @@ public class StudentRepository extends BaseRepository<Student> {
     public StudentRepository() {
         super("students");
     }
-    
-    public Task<Void> addCertificate(String studentId, String certificate_id) {
-        this.find(studentId).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Student student = task.getResult().toObject(Student.class);
-                student.getCertificates().add(certificate_id);
-                this.update(studentId, student);
-            }
-        });
-        return null;
-    }
 }
 

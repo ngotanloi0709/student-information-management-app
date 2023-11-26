@@ -13,11 +13,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.ngtnl1.student_information_management_app.R;
+import com.ngtnl1.student_information_management_app.controller.adapter.StudentDetailAdapter;
+import com.ngtnl1.student_information_management_app.controller.adapter.StudentManagementAdapter;
 import com.ngtnl1.student_information_management_app.model.Certificate;
 import com.ngtnl1.student_information_management_app.model.Student;
+import com.ngtnl1.student_information_management_app.service.CertificateService;
 import com.ngtnl1.student_information_management_app.service.StudentService;
 
 import java.util.ArrayList;
@@ -31,8 +36,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class StudentDetailFragment extends Fragment {
     @Inject
     StudentService studentService;
+    @Inject
+    CertificateService certificateService;
     private List<Certificate> items;
-//    private StudentDetailAdapter adapter;
+    private StudentDetailAdapter adapter;
     private Student student;
     private RecyclerView recyclerView;
     private TextView textViewMainStudentDetailId;
@@ -43,6 +50,8 @@ public class StudentDetailFragment extends Fragment {
     private TextView textViewMainStudentDetailEmail;
     private TextView textViewMainStudentDetailPhone;
     private Button buttonMainStudentDetailEdit;
+    private Button buttonMainStudentDetailAddCertificate;
+
     public StudentDetailFragment(Student student) {
         this.student = student;
     }
@@ -57,7 +66,7 @@ public class StudentDetailFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         initViews();
-        setData();
+        setStudentData();
         setupRecyclerView();
         setOnClickListener();
     }
@@ -72,9 +81,10 @@ public class StudentDetailFragment extends Fragment {
         textViewMainStudentDetailEmail = getView().findViewById(R.id.textViewMainStudentDetailEmail);
         textViewMainStudentDetailPhone = getView().findViewById(R.id.textViewMainStudentDetailPhone);
         buttonMainStudentDetailEdit = getView().findViewById(R.id.buttonMainStudentDetailEdit);
+        buttonMainStudentDetailAddCertificate = getView().findViewById(R.id.buttonMainStudentDetailAddCertificate);
     }
 
-    private void setData() {
+    private void setStudentData() {
         textViewMainStudentDetailId.setText(convertDocumentId(student.getId()));
         textViewMainStudentDetailName.setText(student.getName());
         textViewMainStudentDetailMajor.setText(student.getMajor());
@@ -99,11 +109,29 @@ public class StudentDetailFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
+        items = new ArrayList<>();
+        adapter = new StudentDetailAdapter(items);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        registerForContextMenu(recyclerView);
+
+        adapter.setOnStudentDetailItemClickListener(new StudentDetailAdapter.OnStudentDetailItemClickListener() {
+            @Override
+            public void onButtonDeleteClick(int position, Certificate certificate) {
+                showDeleteStudentDialog(certificate);
+            }
+        });
+
+        updateStudentCertificateData();
     }
 
     private void setOnClickListener() {
         buttonMainStudentDetailEdit.setOnClickListener(v -> {
             showEditStudentDialog();
+        });
+
+        buttonMainStudentDetailAddCertificate.setOnClickListener(v -> {
+            showAddCertificateDialog();
         });
     }
 
@@ -170,7 +198,7 @@ public class StudentDetailFragment extends Fragment {
             studentService.updateStudent(student).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(requireContext(), "Sửa sinh viên thành công", Toast.LENGTH_SHORT).show();
-                    updateData();
+                    updateStudentData();
                 } else {
                     Toast.makeText(requireContext(), "Sửa sinh viên thất bại", Toast.LENGTH_SHORT).show();
                 }
@@ -182,13 +210,121 @@ public class StudentDetailFragment extends Fragment {
         builder.show();
     }
 
-    private void updateData() {
+    private void showAddCertificateDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Thêm chứng chỉ");
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_certificate, null);
+
+        Spinner spinnerDialogAddCertificateName = view.findViewById(R.id.spinnerDialogAddCertificateName);
+
+        List<Certificate> data = new ArrayList<>();
+
+        certificateService.findAllCertificate().addOnCompleteListener(queryDocumentSnapshots -> {
+            if (queryDocumentSnapshots.isSuccessful()) {
+                List<String> data_name = new ArrayList<>();
+
+                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
+                    Certificate certificate = documentSnapshot.toObject(Certificate.class);
+
+                    assert certificate != null;
+                    certificate.setId(documentSnapshot.getId());
+
+                    data.add(certificate);
+                    data_name.add(certificate.getName());
+                }
+
+                ArrayAdapter<String> spinnerAdapterName = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, data_name);
+                spinnerAdapterName.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerDialogAddCertificateName.setAdapter(spinnerAdapterName);
+            }
+        });
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Thêm chứng chỉ", (dialog, which) -> {
+            String name = spinnerDialogAddCertificateName.getSelectedItem().toString();
+
+            for (Certificate certificate : data) {
+                if (certificate.getName().equals(name)) {
+                    if (student.getCertificates() == null) {
+                        student.setCertificates(new ArrayList<>());
+                    }
+
+                    if (student.getCertificates().contains(certificate.getId())) {
+                        Toast.makeText(requireContext(), "Sinh viên đã có chứng chỉ này", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    student.getCertificates().add(certificate.getId());
+                    break;
+                }
+            }
+
+            studentService.updateStudent(student).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(requireContext(), "Thêm chứng chỉ thành công", Toast.LENGTH_SHORT).show();
+                    updateStudentData();
+                    updateStudentCertificateData();
+                } else {
+                    Toast.makeText(requireContext(), "Thêm chứng chỉ thất bại", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            dialog.dismiss();
+        });
+
+        builder.show();
+    }
+
+    private void showDeleteStudentDialog(Certificate certificate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Xóa chứng chỉ");
+
+        builder.setPositiveButton("Xóa chứng chỉ", (dialog, which) -> {
+            student.getCertificates().remove(certificate.getId());
+
+            studentService.updateStudent(student).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(requireContext(), "Xóa chứng chỉ thành công", Toast.LENGTH_SHORT).show();
+                    updateStudentData();
+                    updateStudentCertificateData();
+                } else {
+                    Toast.makeText(requireContext(), "Xóa chứng chỉ thất bại", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            dialog.dismiss();
+        });
+
+        builder.show();
+    }
+
+    private void updateStudentData() {
         studentService.findStudentDataRaw(student.getId()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 student = task.getResult().toObject(Student.class);
-                setData();
-            } else {
-                Toast.makeText(requireContext(), "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                setStudentData();
+            }
+        });
+    }
+
+    private void updateStudentCertificateData() {
+        certificateService.findAllCertificate().addOnCompleteListener(queryDocumentSnapshots -> {
+            if (queryDocumentSnapshots.isSuccessful()) {
+                items.clear();
+                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getResult()) {
+                    Certificate certificate = documentSnapshot.toObject(Certificate.class);
+
+                    assert certificate != null;
+                    certificate.setId(documentSnapshot.getId());
+
+                    if (student.getCertificates() != null && student.getCertificates().contains(certificate.getId())) {
+                        items.add(certificate);
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
             }
         });
     }

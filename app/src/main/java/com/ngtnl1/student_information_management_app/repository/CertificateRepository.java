@@ -9,6 +9,4 @@ public class CertificateRepository extends BaseRepository<Certificate> {
     public CertificateRepository() {
         super("certificates");
     }
-
-
 }
