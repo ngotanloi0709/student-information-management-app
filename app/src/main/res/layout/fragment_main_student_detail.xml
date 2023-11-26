@@ -173,7 +173,7 @@
             android:text="Sửa thông tin " />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/buttonMainStudentDetailAddCertificate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
