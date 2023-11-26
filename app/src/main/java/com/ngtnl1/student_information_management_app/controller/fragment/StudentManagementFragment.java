@@ -91,6 +91,7 @@ public class StudentManagementFragment extends Fragment {
                 showDeleteStudentDialog(student);
             }
         });
+
         updateData();
     }
 
