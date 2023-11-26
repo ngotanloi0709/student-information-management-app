@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 public class Certificate {
     private String id;
     private String name;
+
+    public Certificate(String name) {
+        this.name = name;
+    }
 }

@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.ngtnl1.student_information_management_app.model.Student;
 
 public class BaseRepository<T> {
 
@@ -41,6 +42,4 @@ public class BaseRepository<T> {
     public Task<DocumentSnapshot> find(String id) {
         return db.collection(collectionName).document(id).get();
     }
-
-
 }

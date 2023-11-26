@@ -2,6 +2,7 @@ package com.ngtnl1.student_information_management_app.service;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ngtnl1.student_information_management_app.model.Student;
 import com.ngtnl1.student_information_management_app.repository.StudentRepository;
@@ -28,5 +29,13 @@ public class StudentService {
 
     public Task<Void> deleteStudent(String id) {
         return studentRepository.remove(id);
+    }
+
+    public Task<Void> updateStudent(Student student) {
+        return studentRepository.update(student.getId(), student);
+    }
+
+    public Task<DocumentSnapshot> findStudentDataRaw(String id) {
+        return studentRepository.find(id);
     }
 }

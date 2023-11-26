@@ -99,11 +99,7 @@ public class UserManagementAdapter extends RecyclerView.Adapter<UserManagementAd
         }
 
         private void setProfileImage(String id) {
-            storageReference.child("images/" +id + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-                Glide.with(itemView.getContext()).load(uri).into(imageMainUserManagementAvatar);
-            }).addOnFailureListener(exception -> {
-                Glide.with(itemView.getContext()).load(R.drawable.img_sample_avatar).into(imageMainUserManagementAvatar);
-            });
+            storageReference.child("images/" +id + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> Glide.with(itemView.getContext()).load(uri).into(imageMainUserManagementAvatar)).addOnFailureListener(exception -> Glide.with(itemView.getContext()).load(R.drawable.img_sample_avatar).into(imageMainUserManagementAvatar));
         }
     }
 }

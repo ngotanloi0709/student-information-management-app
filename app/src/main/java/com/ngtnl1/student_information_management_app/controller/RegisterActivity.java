@@ -83,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
             editTextRegisterPassword.setError("Mật khẩu cần ít nhất 6 ký tự!");
             editTextRegisterPassword.requestFocus();
             isValid = false;
-        } else if (!authValidationService.isRepeatPasswordValid(password, editTextRegisterRepeatPassword.getText().toString())) {
+        } else if (!authValidationService.isRepeatPasswordValid(password, repeatPassword)) {
             editTextRegisterRepeatPassword.setError("Mật khẩu nhập lại không khớp!");
             editTextRegisterRepeatPassword.requestFocus();
             isValid = false;

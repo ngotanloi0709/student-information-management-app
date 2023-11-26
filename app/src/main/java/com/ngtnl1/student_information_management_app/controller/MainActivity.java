@@ -22,6 +22,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
+import com.ngtnl1.student_information_management_app.controller.fragment.CertificateManagementFragment;
 import com.ngtnl1.student_information_management_app.controller.fragment.StudentManagementFragment;
 import com.ngtnl1.student_information_management_app.controller.fragment.ProfileManagementFragment;
 import com.ngtnl1.student_information_management_app.controller.fragment.UserManagementFragment;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initViews();
         configureDrawer();
         setDefaultFragment();
-        userService.isAdmin();
+        userService.getRole();
     }
 
     private void initViews() {
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setDefaultFragment() {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new StudentManagementFragment()).commit();
-        navigationView.setCheckedItem(R.id.menuItemMainHomepage);
+        navigationView.setCheckedItem(R.id.menuItemMainStudentManagement);
     }
 
     @Override
@@ -94,12 +95,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         int itemId = item.getItemId();
 
-        if (itemId == R.id.menuItemMainHomepage) {
+        if (itemId == R.id.menuItemMainStudentManagement) {
             selectedFragment = new StudentManagementFragment();
         } else if (itemId == R.id.menuItemMainUserManagement) {
             if (!appStatusService.isOnline()) {
                 Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
-            } else if (userService.isManager()) {
+            } else if (!userService.current_role.equals("ADMIN")) {
                 Toast.makeText(this, "Bạn không có quyền truy cập.", Toast.LENGTH_SHORT).show();
             } else {
                 selectedFragment = new UserManagementFragment();
@@ -109,6 +110,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 selectedFragment = new ProfileManagementFragment();
             } else {
                 Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (itemId == R.id.menuItemMainCertificateManagement) {
+            if (!appStatusService.isOnline()) {
+                Toast.makeText(this, "Không có kết nối internet.", Toast.LENGTH_SHORT).show();
+            } else if (!userService.current_role.equals("ADMIN") && !userService.current_role.equals("MANAGER")) {
+                Toast.makeText(this, "Bạn không có quyền truy cập.", Toast.LENGTH_SHORT).show();
+            } else {
+                selectedFragment = new CertificateManagementFragment();
             }
         } else if (itemId == R.id.menuItemMainLogin) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -154,11 +163,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setProfileImage() {
         if (userService.isUserSignedIn() && appStatusService.isOnline()) {
-            storageReference.child("images/" + userService.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-                Glide.with(this).load(uri).into(imageMainAvatar);
-            }).addOnFailureListener(exception -> {
-                Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
-            });
+            storageReference.child("images/" + userService.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> Glide.with(this).load(uri).into(imageMainAvatar)).addOnFailureListener(exception -> Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar));
         } else {
             Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainAvatar);
         }

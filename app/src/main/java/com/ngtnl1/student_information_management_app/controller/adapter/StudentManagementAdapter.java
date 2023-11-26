@@ -82,26 +82,20 @@ public class StudentManagementAdapter extends RecyclerView.Adapter<StudentManage
             textViewMainStudentManagementEmail.setText(student.getEmail());
             textViewMainStudentManagementPhone.setText(student.getPhone());
 
-            buttonMainStudentManagementDetail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onStudentItemClickListener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            onStudentItemClickListener.onButtonDetailClick(position, items.get(position));
-                        }
+            buttonMainStudentManagementDetail.setOnClickListener(v -> {
+                if (onStudentItemClickListener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        onStudentItemClickListener.onButtonDetailClick(position, items.get(position));
                     }
                 }
             });
 
-            buttonMainStudentManagementDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onStudentItemClickListener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            onStudentItemClickListener.onButtonDeleteClick(position, items.get(position));
-                        }
+            buttonMainStudentManagementDelete.setOnClickListener(v -> {
+                if (onStudentItemClickListener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        onStudentItemClickListener.onButtonDeleteClick(position, items.get(position));
                     }
                 }
             });

@@ -8,10 +8,15 @@
         android:layout_height="match_parent"
         android:checkableBehavior="none">
         <item
-            android:id="@+id/menuItemMainHomepage"
+            android:id="@+id/menuItemMainStudentManagement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:title="Danh sách sinh viên" />
+        <item
+            android:id="@+id/menuItemMainCertificateManagement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:title="Danh sách chứng chỉ" />
         <item
             android:id="@+id/menuItemMainProfileManagement"
             android:layout_width="wrap_content"

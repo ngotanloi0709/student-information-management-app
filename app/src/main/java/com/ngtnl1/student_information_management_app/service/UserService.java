@@ -26,10 +26,7 @@ public class UserService {
     UserRepository userRepository;
     AppStatusService appStatusService;
     Context context;
-    public boolean isAdmin = false;
-    public boolean isManager = false;
-    public boolean isEmployee = false;
-
+    public String current_role = "";
 
     @Inject
     public UserService(FirebaseAuth firebaseAuth, UserRepository userRepository, AppStatusService appStatusService, Context context) {
@@ -54,34 +51,13 @@ public class UserService {
         });
     }
 
-    public boolean isAdmin() {
+    public void getRole() {
         getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
             User user = documentSnapshot.toObject(User.class);
             if (user != null) {
-                isAdmin = user.getRole().equals("ADMIN");
+                current_role = user.getRole();
             }
         });
-        return isAdmin;
-    }
-
-    public boolean isManager() {
-        getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
-            User user = documentSnapshot.toObject(User.class);
-            if (user != null) {
-                isManager = user.getRole().equals("MANAGER");
-            }
-        });
-        return isManager;
-    }
-
-    public boolean isEmployee() {
-        getUserDataRaw().addOnSuccessListener(documentSnapshot -> {
-            User user = documentSnapshot.toObject(User.class);
-            if (user != null) {
-                isEmployee = user.getRole().equals("EMPLOYEE");
-            }
-        });
-        return isEmployee;
     }
 
     private void addLoginHistory(User user) {

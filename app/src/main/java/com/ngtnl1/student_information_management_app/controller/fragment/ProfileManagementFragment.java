@@ -117,11 +117,7 @@ public class ProfileManagementFragment extends Fragment {
 
     private void setProfileImage() {
         if (userService.isUserSignedIn()) {
-            storageReference.child("images/" + userService.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-                Glide.with(this).load(uri).into(imageMainProfileManagementAvatar);
-            }).addOnFailureListener(exception -> {
-                Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
-            });
+            storageReference.child("images/" + userService.getUserEmail() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> Glide.with(this).load(uri).into(imageMainProfileManagementAvatar)).addOnFailureListener(exception -> Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar));
         } else {
             Glide.with(this).load(R.drawable.img_sample_avatar).into(imageMainProfileManagementAvatar);
         }
@@ -218,12 +214,8 @@ public class ProfileManagementFragment extends Fragment {
 
             if (fileUri != null) {
                 storageReference.child("images/" + userService.getUserEmail() + ".jpg").putFile(fileUri).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        MainActivity mainActivity = (MainActivity) requireActivity();
-                        mainActivity.setAuthStatusViews(userService.isUserSignedIn());
-                    } else {
-                        Toast.makeText(requireContext(), "Lỗi, không thể cập nhật ảnh đại diện", Toast.LENGTH_SHORT).show();
-                    }
+                    MainActivity mainActivity = (MainActivity) requireActivity();
+                    mainActivity.setAuthStatusViews(userService.isUserSignedIn());
                 });
             }
 

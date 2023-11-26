@@ -18,5 +18,4 @@ public class UserRepository extends BaseRepository<User> {
                 .document(user.getEmail())
                 .set(user);
     }
-
 }

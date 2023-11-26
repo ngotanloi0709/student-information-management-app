@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.ngtnl1.student_information_management_app.R;
@@ -59,9 +58,7 @@ public class UserManagementFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main_user_management, container, false);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_main_user_management, container, false);
     }
 
     @Override
@@ -117,7 +114,7 @@ public class UserManagementFragment extends Fragment {
         TextView textViewDialogUserDetailLoginHistory = view.findViewById(R.id.textViewDialogUserDetailLoginHistory);
 
         textViewDialogUserDetailName.setText(user.getName());
-        textViewDialogUserDetailAge.setText(user.getAge() + "");
+        textViewDialogUserDetailAge.setText(user.getAge());
         textViewDialogUserDetailEmail.setText(user.getEmail());
         textViewDialogUserDetailPhone.setText(user.getPhone());
         textViewDialogUserDetailIsLocked.setText(user.isLocked() ? "Đã khóa" : "Chưa khóa");
@@ -161,9 +158,7 @@ public class UserManagementFragment extends Fragment {
     }
 
     private void setOnClickListener() {
-        buttonMainUserManagementCreateUser.setOnClickListener(v -> {
-            showCreateUserDialog();
-        });
+        buttonMainUserManagementCreateUser.setOnClickListener(v -> showCreateUserDialog());
     }
 
     private void showCreateUserDialog() {
@@ -222,7 +217,7 @@ public class UserManagementFragment extends Fragment {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = requireActivity().getMenuInflater();
         inflater.inflate(R.menu.menu_main_item_user, menu);
@@ -260,7 +255,7 @@ public class UserManagementFragment extends Fragment {
         data.add("ADMIN");
 
         editTextDialogEditUserDetailName.setText(selectedUser.getName());
-        editTextDialogEditUserDetailAge.setText(selectedUser.getAge() + "");
+        editTextDialogEditUserDetailAge.setText(selectedUser.getAge());
         editTextDialogEditUserDetailPhone.setText(selectedUser.getPhone());
         checkBoxDialogEditUserDetailIsLocked.setChecked(selectedUser.isLocked());
 
@@ -300,8 +295,6 @@ public class UserManagementFragment extends Fragment {
         builder.setTitle("Xác nhận xóa người dùng");
 
         builder.setPositiveButton("Xóa", (dialog, which) -> {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
             userService.deleteUser(selectedUser.getEmail()).addOnSuccessListener(aVoid ->
                     Toast.makeText(requireContext(), "Xóa người dùng thành công!", Toast.LENGTH_SHORT).show()
             ).addOnFailureListener(e ->
